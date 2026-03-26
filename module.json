@@ -1,6 +1,6 @@
 {
     "name": "TBankPayment",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "T-Bank (Tinkoff) payment gateway for Flute CMS",
     "authors": ["Flames"],
     "providers": ["Flute\\Modules\\TBankPayment\\Providers\\TBankPaymentProvider"],

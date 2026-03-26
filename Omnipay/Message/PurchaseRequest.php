@@ -44,15 +44,35 @@ class PurchaseRequest extends AbstractRequest
 
     public function sendData($data): PurchaseResponse
     {
+        $url = $this->getBaseUrl() . 'Init';
+
         $httpResponse = $this->httpClient->request(
             'POST',
-            $this->getBaseUrl() . 'Init',
+            $url,
             ['Content-Type' => 'application/json'],
             json_encode($data),
         );
 
-        $responseData = json_decode($httpResponse->getBody()->getContents(), true);
+        $body = $httpResponse->getBody()->getContents();
+        $responseData = json_decode($body, true);
 
-        return $this->response = new PurchaseResponse($this, $responseData);
+        if ($responseData === null && $body !== '') {
+            logs()->error('tbank.purchase.invalid_response', [
+                'url' => $url,
+                'http_status' => $httpResponse->getStatusCode(),
+                'body_preview' => mb_substr($body, 0, 500),
+            ]);
+        }
+
+        if (is_array($responseData) && ($responseData['Success'] ?? true) === false) {
+            logs()->warning('tbank.purchase.api_error', [
+                'error_code' => $responseData['ErrorCode'] ?? null,
+                'message' => $responseData['Message'] ?? null,
+                'details' => $responseData['Details'] ?? null,
+                'order_id' => $data['OrderId'] ?? null,
+            ]);
+        }
+
+        return $this->response = new PurchaseResponse($this, $responseData ?? []);
     }
 }

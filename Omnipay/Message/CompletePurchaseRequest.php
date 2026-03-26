@@ -18,6 +18,16 @@ class CompletePurchaseRequest extends AbstractRequest
             }
         }
 
+        if (empty($data['Token'])) {
+            logs()->warning('tbank.webhook.raw_debug', [
+                'post_keys' => array_keys($this->httpRequest->request->all()),
+                'content_length' => strlen($this->httpRequest->getContent()),
+                'content_type' => $this->httpRequest->headers->get('Content-Type'),
+                'content_preview' => mb_substr($this->httpRequest->getContent(), 0, 300),
+                'data_keys' => array_keys($data),
+            ]);
+        }
+
         return $data;
     }
 
