@@ -28,7 +28,11 @@ class CompletePurchaseResponse extends AbstractResponse
 
     public function isSuccessful(): bool
     {
-        return isset($this->data['Status']) && $this->data['Status'] === 'CONFIRMED';
+        if (!isset($this->data['Status'])) {
+            return false;
+        }
+
+        return in_array($this->data['Status'], ['CONFIRMED', 'AUTHORIZED'], true);
     }
 
     public function getTransactionId(): ?string
@@ -76,14 +80,18 @@ class CompletePurchaseResponse extends AbstractResponse
         $data = $this->data;
         $data['Password'] = $this->request->getPassword();
 
-        unset($data['Token'], $data['Receipt'], $data['DATA']);
+        unset($data['Token'], $data['Receipt'], $data['DATA'], $data['Data']);
 
-        // T-Bank token algorithm: only scalar values, sorted by key
         $filtered = array_filter($data, 'is_scalar');
 
         ksort($filtered);
 
-        $values = implode('', array_map('strval', $filtered));
+        $values = implode('', array_map(function ($v) {
+            if (is_bool($v)) {
+                return $v ? 'true' : 'false';
+            }
+            return (string) $v;
+        }, $filtered));
 
         return hash('sha256', $values);
     }

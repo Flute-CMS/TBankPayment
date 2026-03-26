@@ -14,7 +14,7 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
 
     public function isRedirect(): bool
     {
-        return !empty($this->data['PaymentURL']) && ($this->data['Success'] ?? false) === true;
+        return !empty($this->data['PaymentURL']) && ( $this->data['Success'] ?? false ) === true;
     }
 
     public function getRedirectUrl(): ?string

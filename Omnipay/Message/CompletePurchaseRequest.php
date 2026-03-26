@@ -6,7 +6,19 @@ class CompletePurchaseRequest extends AbstractRequest
 {
     public function getData(): array
     {
-        return $this->httpRequest->request->all();
+        $data = $this->httpRequest->request->all();
+
+        if (empty($data)) {
+            $content = $this->httpRequest->getContent();
+            if (!empty($content)) {
+                $json = json_decode($content, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+                    $data = $json;
+                }
+            }
+        }
+
+        return $data;
     }
 
     public function sendData($data): CompletePurchaseResponse

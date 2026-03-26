@@ -6,7 +6,13 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 {
     protected $zeroAmountAllowed = false;
 
-    protected string $baseUrl = 'https://securepay.tinkoff.ru/v2/';
+    protected string $productionUrl = 'https://securepay.tinkoff.ru/v2/';
+    protected string $testUrl = 'https://rest-api-test.tinkoff.ru/v2/';
+
+    protected function getBaseUrl(): string
+    {
+        return $this->getTestMode() ? $this->testUrl : $this->productionUrl;
+    }
 
     public function getTerminalKey(): string
     {
@@ -38,14 +44,18 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
     {
         $data['Password'] = $this->getPassword();
 
-        unset($data['Token'], $data['Receipt'], $data['DATA']);
+        unset($data['Token'], $data['Receipt'], $data['DATA'], $data['Data']);
 
-        // T-Bank token algorithm: only scalar values, sorted by key
         $filtered = array_filter($data, 'is_scalar');
 
         ksort($filtered);
 
-        $values = implode('', array_map('strval', $filtered));
+        $values = implode('', array_map(function ($v) {
+            if (is_bool($v)) {
+                return $v ? 'true' : 'false';
+            }
+            return (string) $v;
+        }, $filtered));
 
         return hash('sha256', $values);
     }

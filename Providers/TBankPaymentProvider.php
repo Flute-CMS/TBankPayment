@@ -18,10 +18,10 @@ class TBankPaymentProvider extends ModuleServiceProvider
 
         app(PaymentDriverFactory::class)->register('TBank', TBankDriver::class);
 
-        events()->addDeferredListener(
-            RegisterPaymentFactoriesEvent::NAME,
-            [TBankRegisterListener::class, 'registerTBank']
-        );
+        events()->addDeferredListener(RegisterPaymentFactoriesEvent::NAME, [
+            TBankRegisterListener::class,
+            'registerTBank',
+        ]);
     }
 
     public function register(\DI\Container $container): void
